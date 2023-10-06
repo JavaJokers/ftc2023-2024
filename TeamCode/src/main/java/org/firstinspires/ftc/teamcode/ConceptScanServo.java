@@ -63,7 +63,7 @@ public class ConceptScanServo extends LinearOpMode {
     boolean rampUp = true;
 
 
-    @Override
+    //@Override
     public void runOpMode() {
 
         // Connect to servo (Assume Robot Left Hand)
