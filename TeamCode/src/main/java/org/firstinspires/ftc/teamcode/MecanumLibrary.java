@@ -32,31 +32,28 @@ package org.firstinspires.ftc.teamcode;
 //Code modified into a library by 13828 Java Jokers
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorController;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 //import org.firstinspires.ftc.teamcode.PIDController;
 
-import java.lang.reflect.Parameter;
-import java.util.Locale;
 
-    @TeleOp(name = "DoNotRun", group = "Libraries")
+//@TeleOp(name = "DoNotRun", group = "Libraries")
 // @Disabled
-    public class MecanumLibraryDoNotRun extends LinearOpMode {
-
-        public static Orientation angles;
+    public class MecanumLibrary{
+        public MecanumLibrary(HardwareMap map, Telemetry telem) {
+            telemetry = telem;
+            hardwareMap = map;
+            imu = hardwareMap.get(BNO055IMU.class, "imu");
+            parameters = new BNO055IMU.Parameters();
+        }
+        private HardwareMap hardwareMap;
+        private Telemetry telemetry;
+        public static Orientation angles = new Orientation();
         public static Acceleration gravity;
         public DcMotor lF;
         public DcMotor lB;
@@ -66,13 +63,8 @@ import java.util.Locale;
         private double frontRightPower;
         private double backLeftPower;
         private double backRightPower;
-        private BNO055IMU imu = hardwareMap.get(BNO055IMU.class, "imu");
-        private BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        @Override
-        public void runOpMode() throws InterruptedException {
-            telemetry.addData("","Program stopped, do not run");
-            telemetry.update();
-        }
+        private BNO055IMU imu;
+        private BNO055IMU.Parameters parameters;
         public void begin(){
             lF = hardwareMap.dcMotor.get("front_left");
             lB = hardwareMap.dcMotor.get("back_left");
@@ -91,12 +83,10 @@ import java.util.Locale;
             rB.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         }
         public void update(double x, double y, double t, boolean power75, boolean power25, boolean resetOrient) {
-
-            // set gamepad values
-            //double x = gamepad1.left_stick_x * 1.1;
-            //double y = -gamepad1.left_stick_y;
-            //double t = gamepad1.right_stick_x;
             // rotation
+            x = -x;
+            t = -t;
+            angles = imu.getAngularOrientation();
             double x_rotated = x * Math.cos(angles.firstAngle) - y * Math.sin(angles.firstAngle);
             double y_rotated = x * Math.sin(angles.firstAngle) + y * Math.cos(angles.firstAngle);
             // x, y, theta input mixing
