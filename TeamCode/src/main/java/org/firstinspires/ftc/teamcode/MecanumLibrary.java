@@ -54,7 +54,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
         private HardwareMap hardwareMap;
         private Telemetry telemetry;
         public static Orientation angles = new Orientation();
-        public static Acceleration gravity;
         public DcMotor lF;
         public DcMotor lB;
         public DcMotor rF;
@@ -87,14 +86,16 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
             x = -x;
             t = -t;
             angles = imu.getAngularOrientation();
-            double x_rotated = x * Math.cos(angles.firstAngle) - y * Math.sin(angles.firstAngle);
-            double y_rotated = x * Math.sin(angles.firstAngle) + y * Math.cos(angles.firstAngle);
+            double x_rotated = x * Math.cos(-angles.firstAngle) - y * Math.sin(-angles.firstAngle);
+            double y_rotated = x * Math.sin(-angles.firstAngle) + y * Math.cos(-angles.firstAngle);
+            telemetry.addData("angle: ",angles.firstAngle);
+            telemetry.update();
             // x, y, theta input mixing
             double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(t), 1);
-            frontLeftPower = (y + x + t) / denominator;
-            backLeftPower = (y - x + t) / denominator;
-            frontRightPower = (y - x - t) / denominator;
-            backRightPower = (y + x - t) / denominator;
+            frontLeftPower = (y_rotated + x_rotated + t) / denominator;
+            backLeftPower = (y_rotated - x_rotated + t) / denominator;
+            frontRightPower = (y_rotated - x_rotated - t) / denominator;
+            backRightPower = (y_rotated + x_rotated - t) / denominator;
             // Send calculated power to motors
             if (power75) {
                 lF.setPower(frontLeftPower * 0.75);
