@@ -71,7 +71,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
             rB = hardwareMap.dcMotor.get("back_right");
             imu.initialize(parameters);
             telemetry.addData("Status", "Initialized");
-            telemetry.update();
             lF.setDirection(DcMotor.Direction.FORWARD);
             rF.setDirection(DcMotor.Direction.REVERSE);
             lB.setDirection(DcMotor.Direction.FORWARD);
@@ -89,7 +88,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
             double x_rotated = x * Math.cos(-angles.firstAngle) - y * Math.sin(-angles.firstAngle);
             double y_rotated = x * Math.sin(-angles.firstAngle) + y * Math.cos(-angles.firstAngle);
             telemetry.addData("angle: ",angles.firstAngle);
-            telemetry.update();
             // x, y, theta input mixing
             double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(t), 1);
             frontLeftPower = (y_rotated + x_rotated + t) / denominator;
