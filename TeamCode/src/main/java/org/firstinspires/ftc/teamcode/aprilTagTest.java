@@ -47,7 +47,7 @@ public class aprilTagTest extends LinearOpMode {
      */
     private VisionPortal visionPortal;
     @Override
-    public void runOpMode(){
+    public void runOpMode() {
         mecanum = new MecanumLibrary(hardwareMap, telemetry);
         motors = new MotorHardwareMap(hardwareMap, telemetry);
         mecanum.begin();
@@ -113,7 +113,7 @@ public class aprilTagTest extends LinearOpMode {
 // Optional: set other custom features of the VisionPortal (4 are shown here).
         myVisionPortalBuilder.setCameraResolution(new Size(640, 480));  // Each resolution, for each camera model, needs calibration values for good pose estimation.
         myVisionPortalBuilder.setStreamFormat(VisionPortal.StreamFormat.YUY2);  // MJPEG format uses less bandwidth than the default YUY2.
-       myVisionPortalBuilder.enableLiveView(true);      // Enable LiveView (RC preview).
+        myVisionPortalBuilder.enableLiveView(true);      // Enable LiveView (RC preview).
         myVisionPortalBuilder.setAutoStopLiveView(true);     // Automatically stop LiveView (RC preview) when all vision processors are disabled.
 
         initAprilTag();
@@ -126,68 +126,71 @@ public class aprilTagTest extends LinearOpMode {
         if (opModeIsActive()) {
             while (opModeIsActive()) {
                 AutoDriveJustPressed = gamepad1.a && !prevAutoDrive;
-                if(AutoDriveJustPressed){
+                if (AutoDriveJustPressed) {
                     isAutoDriving = !isAutoDriving;
                 }
                 prevAutoDrive = gamepad1.a;
                 //begin detection
-                telemetry.addData("is auto driving ",isAutoDriving);
+                telemetry.addData("is auto driving ", isAutoDriving);
 
                 detections = aprilTag.getDetections();
-                for(AprilTagDetection e : detections){
-                    if(e.metadata!=null){
+                for (AprilTagDetection e : detections) {
+                    if (e.metadata != null) {
                         target = e;
                     }
                 }
-                if(detections.isEmpty()){
+                if (detections.isEmpty()) {
                     target = null;
-                };
-                if(isAutoDriving){
+                }
+                ;
+                if (isAutoDriving) {
                     telemetry.addLine("is autodriving if triggered");
-                    if(target!=null) {
-                        if(target.ftcPose.range<10){
-                            mecanum.update(0,0,0,false,false,false);
-                        }
-                        else if (target.ftcPose.yaw < 10 && target.ftcPose.yaw > -10) {
+                    if (target != null) {
+                        if (target.ftcPose.range < 10) {
+                            mecanum.update(0, 0, 0, false, false, false);
+                        } else if (target.ftcPose.yaw < 10 && target.ftcPose.yaw > -10) {
                             mecanum.update(0, -0.25, 0, false, false, true);
                             telemetry.addData("yaw if triggered", target.ftcPose.yaw);
-                        }
-                        else {
+                        } else {
                             telemetry.addData("yaw if did not trigger", target.ftcPose.yaw);
-                            mecanum.update(0, 0, target.ftcPose.yaw /720, false, false, false);
+                            mecanum.update(0, 0, target.ftcPose.yaw / 720, false, false, false);
                         }
+                    } else {
+                        mecanum.update(0, 0, 0, false, false, false);
                     }
-                    else{
-                        mecanum.update(0,0,0,false,false,false);
+                } else {
+                    boolean WristPowerLeft = false;
+                    boolean WristPowerRight = false;
+                    if (gamepad2.left_trigger > 0)
+                        WristPowerLeft = true;
+                    else if (gamepad2.right_trigger > 0) {
+                        WristPowerRight = true;
+                        telemetry.addLine("is autodriving if did not trigger");
+                        mecanum.update(gamepad1.left_stick_x * 1.1, gamepad1.left_stick_y, gamepad1.right_stick_x, gamepad1.left_trigger == 1, gamepad1.right_trigger == 1, gamepad1.left_bumper && gamepad1.right_bumper);
+                        motors.update(gamepad2.left_stick_y, gamepad2.x, WristPowerLeft, WristPowerRight);
                     }
-                }
-                else{
-                    telemetry.addLine("is autodriving if did not trigger");
-                    mecanum.update(gamepad1.left_stick_x * 1.1, gamepad1.left_stick_y, gamepad1.right_stick_x, gamepad1.left_trigger==1,gamepad1.right_trigger==1,gamepad1.left_bumper&&gamepad1.right_bumper);
-                    motors.update(gamepad2.left_stick_y,gamepad2.x, gamepad2.left_trigger, gamepad2.right_trigger);
-                }
 
-                telemetryAprilTag();
+                    telemetryAprilTag();
 
-                // Push telemetry to the Driver Station.
-                telemetry.update();
+                    // Push telemetry to the Driver Station.
+                    telemetry.update();
 
-                // Save CPU resources; can resume streaming when needed.
-                if (gamepad1.dpad_down) {
-                    visionPortal.stopStreaming();
-                } else if (gamepad1.dpad_up) {
-                    visionPortal.resumeStreaming();
+                    // Save CPU resources; can resume streaming when needed.
+                    if (gamepad1.dpad_down) {
+                        visionPortal.stopStreaming();
+                    } else if (gamepad1.dpad_up) {
+                        visionPortal.resumeStreaming();
+                    }
+                    // Share the CPU.
+                    sleep(20);
                 }
-                // Share the CPU.
-                sleep(20);
             }
-        }
 
-        // Save more CPU resources when camera is no longer needed.
-        visionPortal.close();
+            // Save more CPU resources when camera is no longer needed.
+            visionPortal.close();
 
-    }   // end method runOpMode()
-
+        }   // end method runOpMode()
+    }
     /**
      * Initialize the AprilTag processor.
      */
