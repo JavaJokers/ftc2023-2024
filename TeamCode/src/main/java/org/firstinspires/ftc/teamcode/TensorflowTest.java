@@ -193,7 +193,7 @@ public class TensorflowTest extends LinearOpMode {
                 telemetryTfod();
 
                 // Push telemetry to the Driver Station.
-                telemetry.update();
+
                 AutoDriveJustPressed = gamepad1.a && !prevAutoDrive;
                 if(AutoDriveJustPressed){
                     isAutoDriving = !isAutoDriving;
@@ -260,23 +260,7 @@ public class TensorflowTest extends LinearOpMode {
             }
         }
 
-        // Save more CPU resources when camera is no longer needed.
-        visionPortal.close();
 
-                // Save CPU resources; can resume streaming when needed.
-                if (gamepad1.dpad_down) {
-                    visionPortal.stopStreaming();
-                } else if (gamepad1.dpad_up) {
-                    visionPortal.resumeStreaming();
-                }
-
-                // Share the CPU.
-                sleep(20);
-
-
-
-        // Save more CPU resources when camera is no longer needed.
-        visionPortal.close();
 
     }// end runOpMode()
 
