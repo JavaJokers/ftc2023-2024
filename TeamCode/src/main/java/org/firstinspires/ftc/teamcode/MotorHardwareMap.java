@@ -12,6 +12,7 @@ public class MotorHardwareMap {
     public HardwareMap hardwareMap;
     public Telemetry telemetry;
     public DcMotor arm;
+    public Servo wrist;
     boolean armlockPosition = false;
     boolean prevArmToggle = false;
     public Servo armlock;
@@ -23,14 +24,22 @@ public class MotorHardwareMap {
         arm = hardwareMap.dcMotor.get("arm");
         arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         armlock = hardwareMap.servo.get("armlock");
+        wrist = hardwareMap.servo.get("wrist");
     }
-    public void update (float armPower, boolean armToggle) {
-        arm.setPower((double)armPower);
+    public void update (float armPower, boolean armToggle, boolean wristLeft, boolean wristRight) {
+        arm.setPower(armPower);
+        wrist.setPosition(0.0);
         if(armToggle && !prevArmToggle){armlockPosition=!armlockPosition;}
         if (armlockPosition){armlock.setPosition(1.0);}
         else {armlock.setPosition(0.7);}
         //armlock.setPosition(armPower);
+        if (wristLeft)
+            wrist.setPosition(-90.0);
+        else if (wristRight) {
+            wrist.setPosition(90.0);
+        }
         telemetry.addData("servo: ",armlock.getPosition());
+        telemetry.addData("servo" ,wrist.getPosition());
         telemetry.update();
         prevArmToggle = armToggle;
     }
