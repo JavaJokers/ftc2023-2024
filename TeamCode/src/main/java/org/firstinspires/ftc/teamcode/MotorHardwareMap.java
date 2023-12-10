@@ -16,6 +16,9 @@ public class MotorHardwareMap {
     boolean armlockPosition = false;
     boolean prevArmToggle = false;
     public Servo armlock;
+    public Servo wheelOne;
+    public Servo wheelTwo;
+    public Servo pixelRelease;
     public MotorHardwareMap (HardwareMap map, Telemetry telem) {
         telemetry = telem;
         hardwareMap = map;
@@ -25,6 +28,9 @@ public class MotorHardwareMap {
         arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         armlock = hardwareMap.servo.get("armlock");
         wrist = hardwareMap.servo.get("wrist");
+        wheelOne = hardwareMap.servo.get("wheelOne");
+        wheelTwo = hardwareMap.servo.get("wheelTwo");
+        pixelRelease = hardwareMap.servo.get("pixelRelease");
     }
     public void update (float armPower, boolean armToggle, boolean wristLeft, boolean wristRight) {
         arm.setPower(armPower);
