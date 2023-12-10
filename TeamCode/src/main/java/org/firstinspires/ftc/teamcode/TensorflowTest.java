@@ -178,7 +178,7 @@ public class TensorflowTest extends LinearOpMode {
         myVisionPortalBuilder.enableLiveView(true);      // Enable LiveView (RC preview).
         myVisionPortalBuilder.setAutoStopLiveView(true);     // Automatically stop LiveView (RC preview) when all vision processors are disabled.
 
-        initAprilTag();
+        //initAprilTag();
 
 
         // Wait for the DS start button to be touched.
@@ -267,6 +267,7 @@ public class TensorflowTest extends LinearOpMode {
     /**
      * Initialize the TensorFlow Object Detection processor.
      */
+
     private void initTfod() {
 
         // Create the TensorFlow processor by using a builder.
