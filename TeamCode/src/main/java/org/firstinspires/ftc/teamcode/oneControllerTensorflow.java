@@ -202,6 +202,7 @@ public class oneControllerTensorflow extends LinearOpMode {
                     }
                 }
                 else{
+                    float elbowMove = gamepad2.left_trigger;
                     float armPower = 0;
                     if (gamepad1.left_trigger > 0)
                         armPower = gamepad1.left_trigger;
@@ -210,7 +211,7 @@ public class oneControllerTensorflow extends LinearOpMode {
                     }
                     telemetry.addLine("is autodriving if did not trigger");
                     mecanum.update(gamepad1.left_stick_x * 1.1, gamepad1.left_stick_y, gamepad1.right_stick_x, false,false,gamepad1.left_bumper&&gamepad1.right_bumper);
-                    motors.update(armPower, gamepad2.x, gamepad1.left_bumper, gamepad1.right_bumper);
+                    motors.update(armPower, gamepad2.x, gamepad2.left_stick_y,elbowMove,true, true, true, false,true);
                 }
 
                 telemetryAprilTag();

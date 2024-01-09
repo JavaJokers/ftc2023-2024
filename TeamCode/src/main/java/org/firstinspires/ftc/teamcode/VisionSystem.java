@@ -8,9 +8,12 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.matrices.MatrixF;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import org.firstinspires.ftc.vision.apriltag.AprilTagPoseFtc;
+import org.firstinspires.ftc.vision.apriltag.AprilTagPoseRaw;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.firstinspires.ftc.vision.tfod.TfodProcessor;
 import android.util.Size;
@@ -55,6 +58,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.firstinspires.ftc.vision.tfod.TfodProcessor;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.opencv.core.Point;
 
 import java.util.List;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -63,14 +67,18 @@ import java.util.List;
 
 
 public class VisionSystem  {
-
+    public static AprilTagDetection blankAprilTag = new AprilTagDetection(75,0,0.4f,new Point(),new Point[]{},null,new AprilTagPoseFtc(0,0,0,0,0,0,0,0,0),new AprilTagPoseRaw(0,0,0, new MatrixF(3, 3) {
+        @Override public MatrixF emptyMatrix(int numRows, int numCols) {return null;}@Override public float get(int row, int col) {return 0;}@Override public void put(int row, int col, float value) {}
+    }),800000000);
     private MotorHardwareMap motors;
     private Telemetry telemetry;
     private HardwareMap hardwareMap;
     private AprilTagProcessor aprilTag;
     public List<AprilTagDetection> detections;
     private VisionPortal visionPortal;
-    public AprilTagDetection target;
+    public AprilTagDetection target = blankAprilTag; //allowing this to be null will break everything, if you want to delete it use VisionSystem.blankAprilTag
+    public int pixelNum;
+    public Recognition pixelRecog;
     private static final boolean USE_WEBCAM = true;  // true for webcam, false for phone camera
 
     // TFOD_MODEL_ASSET points to a model file stored in the project Asset location,
@@ -120,7 +128,7 @@ public class VisionSystem  {
         myVisionPortalBuilder.enableLiveView(true);      // Enable LiveView (RC preview).
         myVisionPortalBuilder.setAutoStopLiveView(true);     // Automatically stop LiveView (RC preview) when all vision processors are disabled.
         if (USE_WEBCAM) {
-            myVisionPortalBuilder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"));
+            myVisionPortalBuilder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 2"));
         } else {
             myVisionPortalBuilder.setCamera(BuiltinCameraDirection.BACK);
         }
@@ -149,14 +157,17 @@ public class VisionSystem  {
             telemetry.addData("Image", "%s (%.0f %% Conf.)", recognition.getLabel(), recognition.getConfidence() * 100);
             telemetry.addData("- Position", "%.0f / %.0f", x, y);
             telemetry.addData("- Size", "%.0f x %.0f", recognition.getWidth(), recognition.getHeight());
-        }   // end for() loop
+            pixelNum = currentRecognitions.size();
+            pixelRecog = recognition;
+        }
+
     }   // end method telemetryTfod()
 
     private void telemetryAprilTag() {
-        List<AprilTagDetection> currentDetections = aprilTag.getDetections();
-        telemetry.addData("# AprilTags Detected", currentDetections.size());
+        detections = aprilTag.getDetections();
+        telemetry.addData("# AprilTags Detected", detections.size());
         // Step through the list of detections and display info for each one.
-        for (AprilTagDetection detection : currentDetections) {
+        for (AprilTagDetection detection : detections) {
             if (detection.metadata != null) {
                 telemetry.addLine(String.format("\n==== (ID %d) %s", detection.id, detection.metadata.name));
                 telemetry.addLine(String.format("XYZ %6.1f %6.1f %6.1f  (inch)", detection.ftcPose.x, detection.ftcPose.y, detection.ftcPose.z));
@@ -166,9 +177,13 @@ public class VisionSystem  {
             } else {
                 telemetry.addLine(String.format("\n==== (ID %d) Unknown", detection.id));
                 telemetry.addLine(String.format("Center %6.0f %6.0f   (pixels)", detection.center.x, detection.center.y));
-                target = null;
+                target = blankAprilTag;
             }
-        }   // end for() loop
+        }
+        if(detections.isEmpty()){target=blankAprilTag;}
+        for(AprilTagDetection e:detections){
+            if(e.metadata!=null){target=e;break;}
+        }
         // Add "key" information to telemetry
         telemetry.addLine("\nkey:\nXYZ = X (Right), Y (Forward), Z (Up) dist.");
         telemetry.addLine("PRY = Pitch, Roll & Yaw (XYZ Rotation)");

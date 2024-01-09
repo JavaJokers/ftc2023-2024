@@ -15,38 +15,145 @@ public class MotorHardwareMap {
     public Servo wrist;
     boolean armlockPosition = false;
     boolean prevArmToggle = false;
+    boolean prevPixelRelease = false;
+    boolean pixelReleasePosition = false;
     public Servo armlock;
     public Servo wheelOne;
     public Servo wheelTwo;
-    public Servo pixelRelease;
+    public Servo pixelReleaseServo;
+    public DcMotor elbow;
+    public Servo spin1;
+    public Servo spin2;
+    private boolean armSet = false;
+    private boolean prevArmSet = false;
+    private boolean prevToggleBack = false;
+    private boolean prevToggleForw = false;
+    private boolean prevArmCalibration = false;
+    private boolean prevServoSpin = false;
+    private boolean intakeSpinning = false;
+    private static int armLimitLow = 0;
+    private static int armLimitHigh = 2000;
+    private static int elbowLimitLow = 0;
+    private static int elbowLimitHigh = 3000;
+    private static double armLockLow = 0.76;
+    private static double armLockHigh = 1.0;
+    int modeToggle = 3;
+    int mode0Arm = 0;
+    int mode1Arm = 0;
+    int mode2Arm = 0;
+    int mode0Elbow = 0;
+    int mode1Elbow = 0;
+    int mode2Elbow = 0;
+    float mode0Wrist = 0;
+    float mode1Wrist = 0;
+    float mode2Wrist = 0;
     public MotorHardwareMap (HardwareMap map, Telemetry telem) {
         telemetry = telem;
         hardwareMap = map;
     }
     public void begin () {
+        //This is where the servos and motors are and commands for them
         arm = hardwareMap.dcMotor.get("arm");
         arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         armlock = hardwareMap.servo.get("armlock");
         wrist = hardwareMap.servo.get("wrist");
         wheelOne = hardwareMap.servo.get("wheelOne");
         wheelTwo = hardwareMap.servo.get("wheelTwo");
-        pixelRelease = hardwareMap.servo.get("pixelRelease");
+        pixelReleaseServo = hardwareMap.servo.get("pixelReleaseServo");
+        elbow = hardwareMap.dcMotor.get("elbow");
+        spin1 = hardwareMap.servo.get("spin1");
+        spin2 = hardwareMap.servo.get("spin2");
+        arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        arm.setTargetPosition(0);
+        arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        arm.setPower(0.8);
+        elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        elbow.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        elbow.setTargetPosition(0);
+        elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        elbow.setPower(0.4);
+        //wrist.setPosition(wrist.getPosition());
+        wrist.scaleRange(0,0.5);
+        spin1.setDirection(Servo.Direction.FORWARD);
+        spin2.setDirection(Servo.Direction.REVERSE);
+
+
+
+
     }
-    public void update (float armPower, boolean armToggle, boolean wristLeft, boolean wristRight) {
-        arm.setPower(armPower);
-        wrist.setPosition(0.0);
-        if(armToggle && !prevArmToggle){armlockPosition=!armlockPosition;}
-        if (armlockPosition){armlock.setPosition(1.0);}
-        else {armlock.setPosition(0.7);}
-        //armlock.setPosition(armPower);
-        if (wristLeft)
-            wrist.setPosition(-90.0);
-        else if (wristRight) {
-            wrist.setPosition(90.0);
+    public void update (float armPower, boolean armToggle, float wristMove, float elbowMove, boolean pixelRelease, boolean toggleForward, boolean toggleBackwards, boolean armCalibration, boolean servosSpin) {
+        //arm code
+        if(armCalibration&&!prevArmCalibration&&modeToggle==3){
+            arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            arm.setTargetPosition(armLimitLow);
+            elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            elbow.setTargetPosition(elbowLimitLow);
         }
-        telemetry.addData("servo: ",armlock.getPosition());
-        telemetry.addData("servo" ,wrist.getPosition());
+        prevArmCalibration=armCalibration;
+        if(armPower<0&&arm.getTargetPosition()<=armLimitLow&&modeToggle!=3){arm.setTargetPosition(armLimitLow);armPower=0;}
+        if(armPower>0&&arm.getTargetPosition()>=armLimitHigh&&modeToggle!=3){arm.setTargetPosition(armLimitHigh);armPower=0;}
+        if(armPower!=0){arm.setTargetPosition(arm.getCurrentPosition()-(int)(armPower*120));}
+        if(elbowMove<0&&elbow.getTargetPosition()<=elbowLimitLow&&modeToggle!=3){elbow.setTargetPosition(elbowLimitLow);elbowMove=0;}
+        if(elbowMove>0&&elbow.getTargetPosition()>=elbowLimitHigh&&modeToggle!=3){elbow.setTargetPosition(elbowLimitHigh);elbowMove=0;}
+        if(elbowMove!=0){elbow.setTargetPosition(elbow.getCurrentPosition()-(int)(elbowMove*40));}*/
+        if(arm.getTargetPosition()<1000){elbow.setTargetPosition(1000);}
+        if(arm.getTargetPosition()>1100){elbow.setTargetPosition(1300);}
+        //code for toggling mode
+        if (toggleForward&&!prevToggleForw) {
+            modeToggle = (modeToggle+1)%4;
+        }
+        if (toggleBackwards&&!prevToggleBack&&modeToggle==0) {
+            modeToggle = 3;
+        }else if (toggleBackwards&&!prevToggleBack){
+            modeToggle = modeToggle - 1;
+        }
+        prevToggleForw = toggleForward;
+        prevToggleBack = toggleBackwards;
+        //what the modes are doing
+        if(modeToggle == 0){
+            arm.setTargetPosition(mode0Arm);
+            //wrist.setPosition(mode0Wrist);
+            elbow.setTargetPosition(mode0Elbow);
+        }
+        if(modeToggle == 1){
+            arm.setTargetPosition(mode1Arm);
+            //wrist.setPosition(mode1Wrist);
+            elbow.setTargetPosition(mode1Elbow);
+        }
+        if(modeToggle == 8){
+            arm.setTargetPosition(mode2Arm);
+            //wrist.setPosition(mode2Wrist);
+            elbow.setTargetPosition(mode2Elbow);
+        }
+        //armlock
+        if(armToggle && !prevArmToggle){armlockPosition=!armlockPosition;}
+        if (armlockPosition){armlock.setPosition(armLockHigh);}
+        else {armlock.setPosition(armLockLow);}
+        if(servosSpin && !prevServoSpin){intakeSpinning=!intakeSpinning;}
+        if (intakeSpinning){spin1.setPosition(1.0);spin2.setPosition(1.0);}
+        else {spin1.setPosition(0);spin2.setPosition(0);}
+        //pixel release
+        if(pixelRelease && !prevPixelRelease){pixelReleasePosition=!pixelReleasePosition;}
+        if (pixelReleasePosition){pixelReleaseServo.setPosition(1.0);}
+        else {pixelReleaseServo.setPosition(0.7);}
+        prevServoSpin=servosSpin;
+        //wrist and elbow
+        //wrist.setPosition(wrist.getPosition());
+        //wrist.setPosition(0);
+        wrist.setPosition(0.84);
+        telemetry.addData("mode", modeToggle);
+        telemetry.addData("armLock",armlock.getPosition());
+        telemetry.addData("elbow", elbowMove);
+        telemetry.addData("wrist" ,wristMove);
+        telemetry.addData("arm targetPosition", arm.getTargetPosition());
+        telemetry.addData("arm currentPosition", arm.getCurrentPosition());
+        telemetry.addData("elbow targetPosition", elbow.getTargetPosition());
+        telemetry.addData("elbow currentPosition", elbow.getCurrentPosition());
         telemetry.update();
         prevArmToggle = armToggle;
+        prevPixelRelease = pixelRelease;
     }
 }

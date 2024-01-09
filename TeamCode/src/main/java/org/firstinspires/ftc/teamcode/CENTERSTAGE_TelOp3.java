@@ -78,38 +78,47 @@ public class CENTERSTAGE_TelOp3 extends LinearOpMode{
         waitForStart();
         while (opModeIsActive()) {
             vision.update();
-            boolean d = gamepad1.a;
+            boolean d = gamepad1.y;
             if(d&&!prevAutoDrive){isAutoDriving=!isAutoDriving;}
             prevAutoDrive=d;
             if(isAutoDriving){
                 telemetry.addLine("is autodriving if triggered");
-                if(vision.target!=null) {
-                    if(vision.target.ftcPose.range<10){
-                        mecanum.update(0,0,0,false,false,false);
+                if (vision.pixelNum>0 || vision.target.metadata!=null) {
+                    if (vision.pixelRecog.getConfidence()>0.8){
+                        mecanum.update(0, -0.25, 0, false, false, false);
+                        telemetry.addData("greater than .8 accuracy", vision.pixelRecog.getConfidence());
+                    }else {
+                    mecanum.update(0,0,0,false,false,false);
                     }
-                    else if (vision.target.ftcPose.yaw < 10 && vision.target.ftcPose.yaw > -10) {
+
+                    if (vision.target.metadata!=null&&vision.target.ftcPose.range < 10) {
+                        mecanum.update(0, 0, 0, false, false, false);
+                        telemetry.addData("range less than 10", vision.target.ftcPose.range);
+                    } else if (vision.target.metadata!=null&&vision.target.ftcPose.yaw < 10 && vision.target.ftcPose.yaw > -10) {
                         mecanum.update(0, -0.25, 0, false, false, true);
                         telemetry.addData("yaw if triggered", vision.target.ftcPose.yaw);
-                    }
-                    else {
+                    } else if (vision.target.metadata!=null) {
+                        mecanum.update(0, 0, vision.target.ftcPose.yaw / -180, false, false, true);
+                        telemetry.addData("yaw if triggered", vision.target.ftcPose.yaw);
+                    } else {
                         telemetry.addData("yaw if did not trigger", vision.target.ftcPose.yaw);
-                        mecanum.update(0, 0, vision.target.ftcPose.yaw /720, false, false, false);
+                        mecanum.update(0, 0, 0, false, false, false);
                     }
                 }
-                else{
-                    mecanum.update(0,0,0,false,false,false);
-                }
+                else {mecanum.update(0,0,0,false,false,false);}
             }
             else{
+
                 float armPower = 0;
-                if (gamepad1.left_trigger > 0)
-                    armPower = gamepad1.left_trigger;
-                else if (gamepad1.right_trigger > 0) {
-                    armPower = gamepad1.right_trigger * -1;
+                if (gamepad2.left_trigger > 0)
+                    armPower = gamepad2.left_trigger;
+                else if (gamepad2.right_trigger > 0) {
+                    armPower = gamepad2.right_trigger * -1;
                 }
+
                 telemetry.addLine("is autodriving if did not trigger");
                 mecanum.update(gamepad1.left_stick_x * 1.1, gamepad1.left_stick_y, gamepad1.right_stick_x, false,false,gamepad1.left_bumper&&gamepad1.right_bumper);
-                motors.update(armPower, gamepad2.x, gamepad1.left_bumper, gamepad1.right_bumper);
+                motors.update(armPower, gamepad2.x, gamepad2.right_stick_y,gamepad2.left_stick_y,gamepad2.a, gamepad2.right_bumper,gamepad2.left_bumper,gamepad2.left_bumper&&gamepad2.right_bumper, gamepad2.y);
             }
             telemetry.update();
         }
