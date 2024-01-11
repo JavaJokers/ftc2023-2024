@@ -118,7 +118,7 @@ public class CENTERSTAGE_TelOp3 extends LinearOpMode{
 
                 telemetry.addLine("is autodriving if did not trigger");
                 mecanum.update(gamepad1.left_stick_x * 1.1, gamepad1.left_stick_y, gamepad1.right_stick_x, false,false,gamepad1.left_bumper&&gamepad1.right_bumper);
-                motors.update(armPower, gamepad2.x, gamepad2.right_stick_y,gamepad2.left_stick_y,gamepad2.a, gamepad2.right_bumper,gamepad2.left_bumper,gamepad2.left_bumper&&gamepad2.right_bumper, gamepad2.y);
+                motors.update(armPower, gamepad2.x, gamepad2.right_stick_y,gamepad2.left_stick_y,gamepad2.a,(byte)((gamepad2.dpad_down?1:0)+(gamepad2.dpad_left?2:0)+(gamepad2.dpad_up?4:0)+(gamepad2.dpad_right?8:0)),gamepad2.left_bumper&&gamepad2.right_bumper, gamepad2.y);
             }
             telemetry.update();
         }

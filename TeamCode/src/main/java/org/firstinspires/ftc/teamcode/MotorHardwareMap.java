@@ -8,6 +8,9 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+
+import java.util.BitSet;
+
 public class MotorHardwareMap {
     public HardwareMap hardwareMap;
     public Telemetry telemetry;
@@ -37,7 +40,6 @@ public class MotorHardwareMap {
     private static int elbowLimitHigh = 3000;
     private static double armLockLow = 0.76;
     private static double armLockHigh = 1.0;
-    int modeToggle = 3;
     int mode0Arm = 0;
     int mode1Arm = 0;
     int mode2Arm = 0;
@@ -77,14 +79,25 @@ public class MotorHardwareMap {
         wrist.scaleRange(0,0.5);
         spin1.setDirection(Servo.Direction.FORWARD);
         spin2.setDirection(Servo.Direction.REVERSE);
-
-
-
-
     }
-    public void update (float armPower, boolean armToggle, float wristMove, float elbowMove, boolean pixelRelease, boolean toggleForward, boolean toggleBackwards, boolean armCalibration, boolean servosSpin) {
+    public void update (float armPower, boolean armToggle, float wristMove, float elbowMove, boolean pixelRelease, byte target, boolean armCalibration, boolean servosSpin) {
+        if(target!=0){
+            armPower=0;
+        }
+        if((target&1) == 1){
+            arm.setTargetPosition(0);
+        }
+        if(((target&2)>>1) == 1){
+            arm.setTargetPosition(600);
+        }
+        if(((target&4)>>2) == 1){
+            arm.setTargetPosition(1850);
+        }
+        if(((target&8)>>3) == 1){
+            arm.setTargetPosition(2000);
+        }
         //arm code
-        if(armCalibration&&!prevArmCalibration&&modeToggle==3){
+        if(armCalibration&&!prevArmCalibration){
             arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             arm.setTargetPosition(armLimitLow);
@@ -93,41 +106,14 @@ public class MotorHardwareMap {
             elbow.setTargetPosition(elbowLimitLow);
         }
         prevArmCalibration=armCalibration;
-        if(armPower<0&&arm.getTargetPosition()<=armLimitLow&&modeToggle!=3){arm.setTargetPosition(armLimitLow);armPower=0;}
-        if(armPower>0&&arm.getTargetPosition()>=armLimitHigh&&modeToggle!=3){arm.setTargetPosition(armLimitHigh);armPower=0;}
+        if(armPower>0&&arm.getTargetPosition()<=armLimitLow){arm.setTargetPosition(armLimitLow);armPower=0;}
+        if(armPower<0&&arm.getTargetPosition()>=armLimitHigh){arm.setTargetPosition(armLimitHigh);armPower=0;}
         if(armPower!=0){arm.setTargetPosition(arm.getCurrentPosition()-(int)(armPower*120));}
-        if(elbowMove<0&&elbow.getTargetPosition()<=elbowLimitLow&&modeToggle!=3){elbow.setTargetPosition(elbowLimitLow);elbowMove=0;}
-        if(elbowMove>0&&elbow.getTargetPosition()>=elbowLimitHigh&&modeToggle!=3){elbow.setTargetPosition(elbowLimitHigh);elbowMove=0;}
-        if(elbowMove!=0){elbow.setTargetPosition(elbow.getCurrentPosition()-(int)(elbowMove*40));}*/
+        if(elbowMove<0&&elbow.getTargetPosition()<=elbowLimitLow){elbow.setTargetPosition(elbowLimitLow);elbowMove=0;}
+        if(elbowMove>0&&elbow.getTargetPosition()>=elbowLimitHigh){elbow.setTargetPosition(elbowLimitHigh);elbowMove=0;}
+        if(elbowMove!=0){elbow.setTargetPosition(elbow.getCurrentPosition()-(int)(elbowMove*40));}
         if(arm.getTargetPosition()<1000){elbow.setTargetPosition(1000);}
         if(arm.getTargetPosition()>1100){elbow.setTargetPosition(1300);}
-        //code for toggling mode
-        if (toggleForward&&!prevToggleForw) {
-            modeToggle = (modeToggle+1)%4;
-        }
-        if (toggleBackwards&&!prevToggleBack&&modeToggle==0) {
-            modeToggle = 3;
-        }else if (toggleBackwards&&!prevToggleBack){
-            modeToggle = modeToggle - 1;
-        }
-        prevToggleForw = toggleForward;
-        prevToggleBack = toggleBackwards;
-        //what the modes are doing
-        if(modeToggle == 0){
-            arm.setTargetPosition(mode0Arm);
-            //wrist.setPosition(mode0Wrist);
-            elbow.setTargetPosition(mode0Elbow);
-        }
-        if(modeToggle == 1){
-            arm.setTargetPosition(mode1Arm);
-            //wrist.setPosition(mode1Wrist);
-            elbow.setTargetPosition(mode1Elbow);
-        }
-        if(modeToggle == 8){
-            arm.setTargetPosition(mode2Arm);
-            //wrist.setPosition(mode2Wrist);
-            elbow.setTargetPosition(mode2Elbow);
-        }
         //armlock
         if(armToggle && !prevArmToggle){armlockPosition=!armlockPosition;}
         if (armlockPosition){armlock.setPosition(armLockHigh);}
@@ -140,12 +126,13 @@ public class MotorHardwareMap {
         if (pixelReleasePosition){pixelReleaseServo.setPosition(1.0);}
         else {pixelReleaseServo.setPosition(0.7);}
         prevServoSpin=servosSpin;
+
         //wrist and elbow
         //wrist.setPosition(wrist.getPosition());
         //wrist.setPosition(0);
         wrist.setPosition(0.84);
-        telemetry.addData("mode", modeToggle);
         telemetry.addData("armLock",armlock.getPosition());
+        telemetry.addData("target",target);
         telemetry.addData("elbow", elbowMove);
         telemetry.addData("wrist" ,wristMove);
         telemetry.addData("arm targetPosition", arm.getTargetPosition());
