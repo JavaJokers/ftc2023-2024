@@ -111,14 +111,20 @@ public class MotorHardwareMap {
         if(armPower>0&&arm.getTargetPosition()<=armLimitLow){arm.setTargetPosition(armLimitLow);armPower=0;}
         if(armPower<0&&arm.getTargetPosition()>=armLimitHigh){arm.setTargetPosition(armLimitHigh);armPower=0;}
         if(armPower!=0){arm.setTargetPosition(arm.getCurrentPosition()-(int)(armPower*120));}
-        if(elbowMove<0&&elbow.getTargetPosition()<=elbowLimitLow){elbow.setTargetPosition(elbowLimitLow);elbowMove=0;}
-        if(elbowMove>0&&elbow.getTargetPosition()>=elbowLimitHigh){elbow.setTargetPosition(elbowLimitHigh);elbowMove=0;}
+        /*if(elbowMove>0&&elbow.getTargetPosition()<=elbowLimitLow){elbow.setTargetPosition(elbowLimitLow);elbowMove=0;}
+        if(elbowMove<0&&elbow.getTargetPosition()>=elbowLimitHigh){elbow.setTargetPosition(elbowLimitHigh);elbowMove=0;}
         if(elbowMove!=0){elbow.setTargetPosition(elbow.getCurrentPosition()-(int)(elbowMove*40));}
+<<<<<<< HEAD
         if(arm.getTargetPosition()<1000){elbow.setTargetPosition(elbowPosition1);}
         if(arm.getTargetPosition()>1100){elbow.setTargetPosition(elbowPosition2);}
+=======
+        *///This commented code used for calibrating, DO NOT DELETE!
+        if(arm.getTargetPosition()<1000&&!armlockPosition){elbow.setTargetPosition(-175);}
+        if(arm.getTargetPosition()>1100&&!armlockPosition){elbow.setTargetPosition(-225);}
+//>>>>>>>// 5c436a7fa1375a311253e8c6b18be2e1af97c5e1
         //armlock
         if(armToggle && !prevArmToggle){armlockPosition=!armlockPosition;}
-        if (armlockPosition){armlock.setPosition(armLockHigh);}
+        if (armlockPosition){armlock.setPosition(armLockHigh);elbow.setTargetPosition(0);}
         else {armlock.setPosition(armLockLow);}
         if(servosSpin && !prevServoSpin){intakeSpinning=!intakeSpinning;}
         if (intakeSpinning){spin1.setPosition(1.0);spin2.setPosition(1.0);}
