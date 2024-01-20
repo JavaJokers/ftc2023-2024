@@ -76,9 +76,9 @@ public class MotorHardwareMap {
         elbow.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         elbow.setTargetPosition(0);
         elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        elbow.setPower(0.4);
+        elbow.setPower(0.1);
         //wrist.setPosition(wrist.getPosition());
-        wrist.scaleRange(0,0.5);
+        //wrist.scaleRange(0,0.5);
         spin1.setDirection(Servo.Direction.FORWARD);
         spin2.setDirection(Servo.Direction.REVERSE);
     }
@@ -119,8 +119,8 @@ public class MotorHardwareMap {
         if(arm.getTargetPosition()>1100){elbow.setTargetPosition(elbowPosition2);}
 =======
         *///This commented code used for calibrating, DO NOT DELETE!
-        if(arm.getTargetPosition()<1000&&!armlockPosition){elbow.setTargetPosition(-175);}
-        if(arm.getTargetPosition()>1100&&!armlockPosition){elbow.setTargetPosition(-225);}
+        if(arm.getTargetPosition()<1000&&!armlockPosition){elbow.setTargetPosition(205);}
+        if(arm.getTargetPosition()>1100&&!armlockPosition){elbow.setTargetPosition(255);}
 //>>>>>>>// 5c436a7fa1375a311253e8c6b18be2e1af97c5e1
         //armlock
         if(armToggle && !prevArmToggle){armlockPosition=!armlockPosition;}
@@ -138,7 +138,7 @@ public class MotorHardwareMap {
         //wrist and elbow
         //wrist.setPosition(wrist.getPosition());
         //wrist.setPosition(0);
-        wrist.setPosition(0.84);
+        wrist.setPosition(wristMove);//0.84
         telemetry.addData("armLock",armlock.getPosition());
         telemetry.addData("target",target);
         telemetry.addData("elbow", elbowMove);
