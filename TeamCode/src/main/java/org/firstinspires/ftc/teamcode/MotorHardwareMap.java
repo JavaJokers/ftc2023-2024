@@ -138,7 +138,7 @@ public class MotorHardwareMap {
         //wrist and elbow
         //wrist.setPosition(wrist.getPosition());
         //wrist.setPosition(0);
-        wrist.setPosition(wristMove);//0.84
+        wrist.setPosition(0.4);
         telemetry.addData("armLock",armlock.getPosition());
         telemetry.addData("target",target);
         telemetry.addData("elbow", elbowMove);
