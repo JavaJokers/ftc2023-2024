@@ -36,10 +36,12 @@ public class MotorHardwareMap {
     private boolean intakeSpinning = false;
     private static int armLimitLow = 0;
     private static int armLimitHigh = 2000;
-    private static int elbowLimitLow = 0;
-    private static int elbowLimitHigh = 3000;
+    private static int elbowLimitLow = -3000;
+    private static int elbowLimitHigh = 0;
     private static double armLockLow = 0.76;
     private static double armLockHigh = 1.0;
+    private static int elbowPosition1 = -1000;
+    private static int elbowPosition2 = -1300;
     int mode0Arm = 0;
     int mode1Arm = 0;
     int mode2Arm = 0;
@@ -112,8 +114,8 @@ public class MotorHardwareMap {
         if(elbowMove<0&&elbow.getTargetPosition()<=elbowLimitLow){elbow.setTargetPosition(elbowLimitLow);elbowMove=0;}
         if(elbowMove>0&&elbow.getTargetPosition()>=elbowLimitHigh){elbow.setTargetPosition(elbowLimitHigh);elbowMove=0;}
         if(elbowMove!=0){elbow.setTargetPosition(elbow.getCurrentPosition()-(int)(elbowMove*40));}
-        if(arm.getTargetPosition()<1000){elbow.setTargetPosition(1000);}
-        if(arm.getTargetPosition()>1100){elbow.setTargetPosition(1300);}
+        if(arm.getTargetPosition()<1000){elbow.setTargetPosition(elbowPosition1);}
+        if(arm.getTargetPosition()>1100){elbow.setTargetPosition(elbowPosition2);}
         //armlock
         if(armToggle && !prevArmToggle){armlockPosition=!armlockPosition;}
         if (armlockPosition){armlock.setPosition(armLockHigh);}
