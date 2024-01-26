@@ -25,10 +25,10 @@ public class CENTERSTAGE_Autonomous1 extends LinearOpMode {
         waitForStart();
         mecanum.update(0, 0, 180, false, false, false);
         motors.arm.setTargetPosition(30);
-        while (opModeIsActive()) {
+        if (opModeIsActive()) {
             motors.arm.setTargetPosition(30);
             mecanum.update(0, 0, 180, false, false, false);
-            while (1==1) {
+            while (opModeIsActive()) {
                 mecanum.update(0, 50, 0, false, false, false);
             }
         }
