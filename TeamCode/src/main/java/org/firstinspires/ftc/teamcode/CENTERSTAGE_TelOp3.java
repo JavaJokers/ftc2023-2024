@@ -41,6 +41,7 @@ import java.util.List;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -67,6 +68,17 @@ public class CENTERSTAGE_TelOp3 extends LinearOpMode{
     private VisionSystem vision;
     private boolean prevAutoDrive = false;
     private boolean isAutoDriving = false;
+    private boolean prevTargetOne = false;
+    private boolean targetOne = false;
+    private boolean prevTargetTwo = false;
+    private boolean targetTwo = false;
+    private boolean prevTargetThree = false;
+    private boolean targetThree = false;
+    private boolean prevTargetFour = false;
+    private boolean targetFour = false;
+
+    boolean readyToHang = false;
+    int elbowTarget = 1;
     @Override
     public void runOpMode() throws InterruptedException {
         mecanum = new MecanumLibrary(hardwareMap, telemetry);
@@ -108,7 +120,33 @@ public class CENTERSTAGE_TelOp3 extends LinearOpMode{
                 else {mecanum.update(0,0,0,false,false,false);}
             }
             else{
+                targetOne = gamepad2.dpad_up;
+                if(targetOne&&!prevTargetOne){
+                    elbowTarget = 1;
+                }
+                prevTargetOne=targetOne;
+                targetTwo = gamepad2.dpad_right;
+                if(targetTwo&&!prevTargetTwo){
+                    elbowTarget = 2;
+                }
+                prevTargetTwo=targetTwo;
+                targetThree = gamepad2.dpad_down;
+                if(targetThree&&!prevTargetThree){
+                    elbowTarget = 3;
+                }
+                prevTargetThree=targetThree;
 
+                targetFour = gamepad2.dpad_left;
+                if(targetFour&&!prevTargetFour){
+                    if(!readyToHang) {
+                        elbowTarget = 4;
+                        readyToHang =true;
+                    } else {
+                        elbowTarget = 5;
+                        readyToHang = false;
+                    }
+                }
+                prevTargetFour=targetFour;
                 float armPower = 0;
                 if (gamepad2.left_trigger > 0)
                     armPower = gamepad2.left_trigger;
@@ -116,13 +154,17 @@ public class CENTERSTAGE_TelOp3 extends LinearOpMode{
                     armPower = gamepad2.right_trigger * -1;
                 }
 
+
                 telemetry.addLine("is autodriving if did not trigger");
                 mecanum.update(gamepad1.left_stick_x * 1.1, gamepad1.left_stick_y, gamepad1.right_stick_x, false,false,gamepad1.left_bumper&&gamepad1.right_bumper);
-                motors.update(armPower, gamepad2.x, gamepad2.right_stick_y, gamepad2.left_stick_y, gamepad2.a, (byte)((gamepad2.dpad_down?1:0)+(gamepad2.dpad_left?2:0)+(gamepad2.dpad_up?4:0)+(gamepad2.dpad_right?8:0)),gamepad2.left_bumper&&gamepad2.right_bumper, gamepad2.y);
+                motors.update(armPower, gamepad2.x, gamepad2.right_stick_y, gamepad2.left_stick_y, gamepad2.a, (byte)((gamepad2.dpad_down?1:0)+(gamepad2.dpad_left?2:0)+(gamepad2.dpad_up?4:0)+(gamepad2.dpad_right?8:0)),gamepad2.left_bumper&&gamepad2.right_bumper, gamepad2.y, gamepad2.b,elbowTarget);
             }
-            telemetry.update();
+            /*telemetry.addData("front left encoder", mecanum.lF.getCurrentPosition());
+            telemetry.addData("front right encoder", mecanum.rF.getCurrentPosition());
+            telemetry.addData("back left encoder", mecanum.lB.getCurrentPosition());
+            telemetry.addData("back right encoder", mecanum.rB.getCurrentPosition());
+            telemetry.update();*/
         }
-        motors.elbow.setTargetPosition(0);
         Thread.sleep(1500);
     }
 }

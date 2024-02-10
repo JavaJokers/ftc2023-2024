@@ -20,18 +20,15 @@ public class CENTERSTAGE_Autonomous1 extends LinearOpMode {
     public void runOpMode() {
         mecanum = new MecanumLibrary(hardwareMap, telemetry);
         motors = new MotorHardwareMap(hardwareMap, telemetry);
+        vision = new VisionSystem(telemetry, hardwareMap);
         mecanum.begin();
         motors.begin();
+        vision.begin();
         waitForStart();
-        mecanum.update(0, 0, 180, false, false, false);
-        motors.arm.setTargetPosition(30);
-        if (opModeIsActive()) {
-            motors.arm.setTargetPosition(30);
-            mecanum.update(0, 0, 180, false, false, false);
-            while (opModeIsActive()) {
-                mecanum.update(0, 50, 0, false, false, false);
-            }
+        while (opModeIsActive()) {
+            mecanum.update(0, 50, 0, false, false, false);
         }
+
     }
 
 }
