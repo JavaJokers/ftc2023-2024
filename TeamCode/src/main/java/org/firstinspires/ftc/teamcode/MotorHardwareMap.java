@@ -31,6 +31,7 @@ public class MotorHardwareMap {
     private static double armLockHigh = 1.0;
 
     private double elbowTargetVelocity = 0;
+    private double elbowTargetPosition = 0;
 
 
     public MotorHardwareMap (HardwareMap map, Telemetry telem) {
@@ -60,6 +61,7 @@ public class MotorHardwareMap {
             elbowVelocity = Math.abs(elbowVelocity);
         }
         elbowTargetVelocity = elbowVelocity;
+        elbowTargetPosition = elbowPosition;
         elbow.setPower(1.0);
         if(elbow.getCurrentPosition()<=(elbowPosition+20)&&elbow.getCurrentPosition()>=(elbowPosition-20)){
             elbow.setTargetPosition(elbowPosition);
@@ -151,7 +153,7 @@ public class MotorHardwareMap {
         //telemetry.addData("arm targetPosition", arm.getTargetPosition());
         telemetry.addData("Elbow Velocity", elbowTargetVelocity);
         telemetry.addData("Elbow Power",elbow.getPower());
-        telemetry.addData("elbow targetPosition", elbow.getTargetPosition());
+        telemetry.addData("elbow targetPosition", elbowTargetPosition);
         telemetry.addData("elbow currentPosition", elbow.getCurrentPosition());
         telemetry.update();
         prevArmToggle = armToggle;
