@@ -30,6 +30,8 @@ public class MotorHardwareMap {
     private static double armLockLow = 0.76;
     private static double armLockHigh = 1.0;
 
+    private double elbowTargetVelocity = 0;
+
 
     public MotorHardwareMap (HardwareMap map, Telemetry telem) {
         telemetry = telem;
@@ -57,6 +59,7 @@ public class MotorHardwareMap {
         }else{
             elbowVelocity = Math.abs(elbowVelocity);
         }
+        elbowTargetVelocity = elbowVelocity;
         elbow.setPower(1.0);
         if(elbow.getCurrentPosition()<=(elbowPosition+20)&&elbow.getCurrentPosition()>=(elbowPosition-20)){
             elbow.setTargetPosition(elbowPosition);
@@ -99,23 +102,23 @@ public class MotorHardwareMap {
     public void update (float armPower, boolean armToggle, float wristMove, float elbowMove, boolean pixelRelease, byte target, boolean armCalibration, boolean servosSpin, boolean servosReverse, int elbowTarget) {
 
 
-        if(elbowTarget == 1){
+        if(elbowTarget == 1){ //intake (up)
             elbowTimerActual = elbowTimerStart;
             armMovementChange(150,0);
             elbowMovementChange(15,185);
-        }else if(elbowTarget == 2){
+        }else if(elbowTarget == 2){ // drive (right)
             armMovementChange(200,600);
             elbowMovementChange(15,185);
             elbowTimerActual = elbowTimerStart;
-        }else if(elbowTarget == 3){
+        }else if(elbowTarget == 3){ // place pixel/outtake (down)
             armMovementChange(150,2000);
             elbowMovementChange(15,285);
-        }else if(elbowTarget == 4){
+        }else if(elbowTarget == 4){ // prepare to hang (left)
             elbowTimerActual = elbowTimerStart;
             armMovementChange(150,1800);
             elbowMovementChange(15,0);
 
-        } else if (elbowTarget == 5){
+        } else if (elbowTarget == 5){ //hang (left again)
             arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             elbowTimerActual = elbowTimerStart;
             arm.setPower(1.0);
@@ -146,7 +149,7 @@ public class MotorHardwareMap {
         telemetry.addData("armLock",armlock.getPosition());
         telemetry.addData("target",target);
         //telemetry.addData("arm targetPosition", arm.getTargetPosition());
-        telemetry.addData("Elbow Velocity", elbow.getVelocity());
+        telemetry.addData("Elbow Velocity", elbowTargetVelocity);
         telemetry.addData("Elbow Power",elbow.getPower());
         telemetry.addData("elbow targetPosition", elbow.getTargetPosition());
         telemetry.addData("elbow currentPosition", elbow.getCurrentPosition());
