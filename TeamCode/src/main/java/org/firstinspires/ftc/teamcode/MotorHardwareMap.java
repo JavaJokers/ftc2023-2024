@@ -1,25 +1,15 @@
 package org.firstinspires.ftc.teamcode;
-import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorControllerEx;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
-
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-
-import java.util.BitSet;
-
 public class MotorHardwareMap {
     public HardwareMap hardwareMap;
     public Telemetry telemetry;
     public DcMotorEx arm;
     public Servo wrist;
-    private PIDFCoefficients pidfCoefficients = new PIDFCoefficients(2,3,2,1);
     boolean armlockPosition = false;
     boolean prevArmToggle = false;
     boolean prevPixelRelease = false;
@@ -33,38 +23,49 @@ public class MotorHardwareMap {
     public Servo spin2;
     private int elbowTimerStart = 50;
     private int elbowTimerActual = elbowTimerStart;
-    private boolean firstHang = false;
-    private boolean armSet = false;
-    private boolean prevArmSet = false;
-    private boolean prevToggleBack = false;
-    private boolean prevToggleForw = false;
-    private boolean prevArmCalibration = false;
     private boolean prevServoSpin = false;
     private boolean prevServoReverse = false;
     private boolean servoDirection = false;
     private boolean intakeSpinning = false;
-    private static int armLimitLow = 0;
-    private static int armLimitHigh = 2000;
-    private static int elbowLimitLow = -3000;
-    private static int elbowLimitHigh = 0;
     private static double armLockLow = 0.76;
     private static double armLockHigh = 1.0;
-    private static int elbowPosition1 = -1000;
-    private static int elbowPosition2 = -1300;
-    int mode0Arm = 0;
-    int mode1Arm = 0;
-    int mode2Arm = 0;
-    int mode0Elbow = 0;
-    int mode1Elbow = 0;
-    int mode2Elbow = 0;
-    float mode0Wrist = 0;
-    float mode1Wrist = 0;
-    float mode2Wrist = 0;
 
-    boolean readyToHang = false;
+
     public MotorHardwareMap (HardwareMap map, Telemetry telem) {
         telemetry = telem;
         hardwareMap = map;
+    }
+    private void armMovementChange (double armVelocity, int armPosition){
+        if(armPosition < arm.getCurrentPosition()){
+            armVelocity = Math.abs(armVelocity)*-1;
+        }else{
+            armVelocity = Math.abs(armVelocity);
+        }
+        arm.setPower(1.0);
+        if(arm.getCurrentPosition()<=(armPosition+50)&&arm.getCurrentPosition()>=(armPosition-50)){
+            arm.setTargetPosition(armPosition);
+            arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        }else{
+            arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            arm.setVelocity(armVelocity);
+        }
+
+    }
+    private void elbowMovementChange (double elbowVelocity, int elbowPosition){
+        if(elbowPosition < elbow.getCurrentPosition()){
+            elbowVelocity = Math.abs(elbowVelocity)*-1;
+        }else{
+            elbowVelocity = Math.abs(elbowVelocity);
+        }
+        elbow.setPower(1.0);
+        if(elbow.getCurrentPosition()<=(elbowPosition+20)&&elbow.getCurrentPosition()>=(elbowPosition-20)){
+            elbow.setTargetPosition(elbowPosition);
+            elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        }else{
+            elbow.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            elbow.setVelocity(elbowVelocity);
+        }
+
     }
     public void begin () {
         //This is where the servos and motors are and commands for them
@@ -83,14 +84,11 @@ public class MotorHardwareMap {
         arm.setTargetPosition(0);
         arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         arm.setPower(0.4);
-        elbow.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        //elbow.setPositionPIDFCoefficients(2);
-        //elbow.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
+        //elbow.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         elbow.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         elbow.setTargetPosition(0);
         elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        //elbow.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION, pidfCoefficients);
         elbow.setPower(0.5);
         spin1.setDirection(Servo.Direction.FORWARD);
         spin2.setDirection(Servo.Direction.REVERSE);
@@ -102,58 +100,33 @@ public class MotorHardwareMap {
 
 
         if(elbowTarget == 1){
-            arm.setPower(0.4);
             elbowTimerActual = elbowTimerStart;
-            arm.setTargetPosition(0);
-            elbow.setTargetPosition(185);
+            armMovementChange(150,0);
+            elbowMovementChange(15,185);
         }else if(elbowTarget == 2){
-            arm.setPower(0.4);
+            armMovementChange(200,600);
+            elbowMovementChange(15,185);
             elbowTimerActual = elbowTimerStart;
-            arm.setTargetPosition(500);
-            elbow.setTargetPosition(185);
         }else if(elbowTarget == 3){
-            arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            arm.setVelocity(100);
-            arm.setPower(0.4);
-            arm.setTargetPosition(1800);
-
-            if(elbowTimerActual == 0){
-                elbow.setTargetPosition(0);
-            }else{
-                elbowTimerActual--;
-            }
+            armMovementChange(150,2000);
+            elbowMovementChange(15,285);
         }else if(elbowTarget == 4){
-                arm.setPower(0.4);
-                elbowTimerActual = elbowTimerStart;
-                arm.setTargetPosition(1800);
-                elbow.setTargetPosition(185);
+            elbowTimerActual = elbowTimerStart;
+            armMovementChange(150,1800);
+            elbowMovementChange(15,0);
+
         } else if (elbowTarget == 5){
+            arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             elbowTimerActual = elbowTimerStart;
             arm.setPower(1.0);
             arm.setTargetPosition(0);
-            elbow.setTargetPosition(185);
+            elbow.setTargetPosition(0);
             armlock.setPosition(armLockLow);
         }
-        //arm code
-        if(armCalibration&&!prevArmCalibration){
-            arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            arm.setTargetPosition(armLimitLow);
-            //elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            //elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            //elbow.setTargetPosition(elbowLimitLow);
-        }
-        prevArmCalibration=armCalibration;
-        //if(armPower>0&&arm.getTargetPosition()<=armLimitLow){arm.setTargetPosition(armLimitLow);armPower=0;}
-        //if(armPower<0&&arm.getTargetPosition()>=armLimitHigh){arm.setTargetPosition(armLimitHigh);armPower=0;}
-        if(armPower!=0){arm.setTargetPosition(arm.getCurrentPosition()-(int)(armPower*120));
 
-        }
-        //armlock
         if(armToggle && !prevArmToggle){armlockPosition=!armlockPosition;}
         if (armlockPosition){
             armlock.setPosition(armLockHigh);
-            //elbow.setTargetPosition(0);
         }
         else {armlock.setPosition(armLockLow);}
         if(servosReverse && !prevServoReverse){servoDirection=!servoDirection;}
@@ -165,13 +138,16 @@ public class MotorHardwareMap {
         if (pixelReleasePosition){pixelReleaseServo.setPosition(1.0);}
         else {pixelReleaseServo.setPosition(0.7);}
         prevServoSpin=servosSpin;
+        telemetry.addData("elbowmode", elbow.getMode());
+        telemetry.addData("arm currentPosition", arm.getCurrentPosition());
         telemetry.addData("timer",elbowTimerActual);
         telemetry.addData("elbow value", elbowTarget);
         telemetry.addData("pidf",elbow.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER));
         telemetry.addData("armLock",armlock.getPosition());
         telemetry.addData("target",target);
-        telemetry.addData("arm targetPosition", arm.getTargetPosition());
-        telemetry.addData("arm currentPosition", arm.getCurrentPosition());
+        //telemetry.addData("arm targetPosition", arm.getTargetPosition());
+        telemetry.addData("Elbow Velocity", elbow.getVelocity());
+        telemetry.addData("Elbow Power",elbow.getPower());
         telemetry.addData("elbow targetPosition", elbow.getTargetPosition());
         telemetry.addData("elbow currentPosition", elbow.getCurrentPosition());
         telemetry.update();
