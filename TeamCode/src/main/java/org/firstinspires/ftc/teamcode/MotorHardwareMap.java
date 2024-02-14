@@ -107,18 +107,18 @@ public class MotorHardwareMap {
         if(elbowTarget == 1){ //intake (up)
             elbowTimerActual = elbowTimerStart;
             armMovementChange(150,0);
-            elbowMovementChange(15,185);
+            elbowMovementChange(35,220);
         }else if(elbowTarget == 2){ // drive (right)
             armMovementChange(200,600);
-            elbowMovementChange(15,185);
+            elbowMovementChange(35,300);
             elbowTimerActual = elbowTimerStart;
         }else if(elbowTarget == 3){ // place pixel/outtake (down)
             armMovementChange(150,2000);
-            elbowMovementChange(15,285);
+            elbowMovementChange(35,400);
         }else if(elbowTarget == 4){ // prepare to hang (left)
             elbowTimerActual = elbowTimerStart;
             armMovementChange(150,1800);
-            elbowMovementChange(15,0);
+            elbowMovementChange(35,0);
 
         } else if (elbowTarget == 5){ //hang (left again)
             arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
