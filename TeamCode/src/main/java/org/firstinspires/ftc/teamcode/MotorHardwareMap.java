@@ -10,6 +10,9 @@ public class MotorHardwareMap {
     public Telemetry telemetry;
     public DcMotorEx arm;
     public Servo wrist;
+    public Servo launcherServo;
+    boolean prevLauncher = false;
+    boolean launcherPosition = false;
     boolean armlockPosition = false;
     boolean prevArmToggle = false;
     boolean prevPixelRelease = false;
@@ -74,6 +77,7 @@ public class MotorHardwareMap {
     }
     public void begin () {
         //This is where the servos and motors are and commands for them
+        launcherServo = hardwareMap.servo.get("launcherServo");
         arm = (DcMotorEx) hardwareMap.dcMotor.get("arm");
         arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         armlock = hardwareMap.servo.get("armlock");
@@ -101,24 +105,24 @@ public class MotorHardwareMap {
     public void update(float armPower, boolean armToggle, float wristMove, float elbowMove, boolean pixelRelease, byte target, boolean armCalibration, boolean servosSpin){
         this.update(armPower, armToggle, wristMove, elbowMove, pixelRelease, target, armCalibration, servosSpin);
     }
-    public void update (float armPower, boolean armToggle, float wristMove, float elbowMove, boolean pixelRelease, byte target, boolean armCalibration, boolean servosSpin, boolean servosReverse, int elbowTarget) {
+    public void update (float armPower, boolean armToggle, float wristMove, float elbowMove, boolean pixelRelease, byte target, boolean armCalibration, boolean servosSpin, boolean servosReverse, int elbowTarget, boolean launcher) {
 
 
         if(elbowTarget == 1){ //intake (up)
             elbowTimerActual = elbowTimerStart;
             armMovementChange(150,0);
-            elbowMovementChange(35,220);
+            elbowMovementChange(50,375);
         }else if(elbowTarget == 2){ // drive (right)
             armMovementChange(200,600);
-            elbowMovementChange(35,300);
+            elbowMovementChange(100,500);
             elbowTimerActual = elbowTimerStart;
         }else if(elbowTarget == 3){ // place pixel/outtake (down)
-            armMovementChange(150,2000);
-            elbowMovementChange(35,400);
+            armMovementChange(150,2150);
+            elbowMovementChange(100,600);
         }else if(elbowTarget == 4){ // prepare to hang (left)
             elbowTimerActual = elbowTimerStart;
             armMovementChange(150,1800);
-            elbowMovementChange(35,0);
+            elbowMovementChange(50,0);
 
         } else if (elbowTarget == 5){ //hang (left again)
             arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -142,6 +146,10 @@ public class MotorHardwareMap {
         if(pixelRelease && !prevPixelRelease){pixelReleasePosition=!pixelReleasePosition;}
         if (pixelReleasePosition){pixelReleaseServo.setPosition(1.0);}
         else {pixelReleaseServo.setPosition(0.7);}
+        if(launcher && !prevLauncher){launcherPosition=!launcherPosition;}
+        if (launcherPosition){launcherServo.setPosition(0.75);}
+        else {launcherServo.setPosition(launcherServo.getPosition());}
+        prevLauncher = launcher;
         prevServoSpin=servosSpin;
         telemetry.addData("elbowmode", elbow.getMode());
         telemetry.addData("arm currentPosition", arm.getCurrentPosition());

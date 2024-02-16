@@ -108,10 +108,10 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
                 rB.setPower(backRightPower * 0.25);
                 }
             else {
-                lF.setPower(frontLeftPower);
-                rF.setPower(frontRightPower);
-                lB.setPower(backLeftPower);
-                rB.setPower(backRightPower);
+                lF.setPower(frontLeftPower * 0.90);
+                rF.setPower(frontRightPower * 0.90);
+                lB.setPower(backLeftPower * 0.90);
+                rB.setPower(backRightPower * 0.90);
             }
             // reinitialize field oriented
             if (resetOrient) {
