@@ -11,7 +11,7 @@ public class MotorHardwareMap {
     public DcMotorEx arm;
     public Servo wrist;
     public Servo launcherServo;
-    boolean prevLauncher = false;
+    boolean launcherAcknowledged = false;
     boolean launcherPosition = false;
     boolean armlockPosition = false;
     boolean prevArmToggle = false;
@@ -26,8 +26,8 @@ public class MotorHardwareMap {
     public Servo spin2;
     private int elbowTimerStart = 50;
     private int elbowTimerActual = elbowTimerStart;
-    private boolean prevServoSpin = false;
-    public boolean prevServoReverse = false;
+    private boolean servoSpinAcknowledged = false;
+    private boolean servoReverseAcknowledged = false;
     private boolean servoDirection = false;
     public boolean intakeSpinning = false;
     private static double armLockLow = 0.76;
@@ -121,19 +121,41 @@ public class MotorHardwareMap {
             armlock.setPosition(armLockHigh);
         }
         else {armlock.setPosition(armLockLow);}
-        if(servosReverse && !prevServoReverse){servoDirection=!servoDirection;}
-        if(servosSpin && !prevServoSpin){intakeSpinning=!intakeSpinning;}
+        if(servosReverse){
+            if(!servoReverseAcknowledged){
+                servoDirection=!servoDirection;
+                servoReverseAcknowledged = true;
+            }
+        } else {
+            servoReverseAcknowledged = false;
+        }
+
+        if(servosSpin){
+            if(!servoSpinAcknowledged){
+                intakeSpinning=!intakeSpinning;
+                servoSpinAcknowledged = true;
+            }
+        } else {
+            servoSpinAcknowledged = false;
+        }
+
         if (intakeSpinning){spin1.setPosition(servoDirection?1.0:0.0);spin2.setPosition(servoDirection?1.0:0.0);}
         else {spin1.setPosition(0.5);spin2.setPosition(0.5);}
         //pixel release
         if(pixelRelease && !prevPixelRelease){pixelReleasePosition=!pixelReleasePosition;}
         if (pixelReleasePosition){pixelReleaseServo.setPosition(1.0);}
         else {pixelReleaseServo.setPosition(0.7);}
-        if(launcher && !prevLauncher){launcherPosition=!launcherPosition;}
+        if(launcher) {
+            if(!launcherAcknowledged){
+                launcherPosition=!launcherPosition;
+                launcherAcknowledged = true;
+            }
+        } else {
+            launcherAcknowledged = false;
+        }
+        
         if (launcherPosition){launcherServo.setPosition(0.75);}
         else {launcherServo.setPosition(launcherServo.getPosition());}
-        prevLauncher = launcher;
-        prevServoSpin=servosSpin;
         telemetry.addData("elbowmode", elbow.getMode());
         telemetry.addData("arm currentPosition", arm.getCurrentPosition());
         telemetry.addData("timer",elbowTimerActual);
