@@ -19,6 +19,7 @@ public class farRedAuto extends LinearOpMode{
         double currentTime = time;
         while (opModeIsActive()) {
             if (time-currentTime >= 1 && time-currentTime < 2) {
+                motors.elbow.setTargetPosition(375);
                 mecanum.update(0, -0.5, 0, false, false, false);
             }
             if (time-currentTime >= 2 && time-currentTime <= 3){

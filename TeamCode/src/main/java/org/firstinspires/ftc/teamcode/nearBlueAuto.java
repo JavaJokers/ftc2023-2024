@@ -31,10 +31,11 @@ public class nearBlueAuto extends LinearOpMode {
                 mecanum.update(0, 0, 0, false, false, false);
             }
             if(time-currentTime>4.4&&time-currentTime<=5.4) {
+                mecanum.update(0,0,0,false,false,false);
                 motors.arm.setTargetPosition(2000);
             }else if (time-currentTime>5.4){
                 mecanum.update(0, 0, 0, false, false, false);
-                motors.pixelReleaseServo.setPosition(1.0);
+
             }
             telemetry.addData("time:", time-currentTime);
             telemetry.addData("time-currentTime:" ,(time - currentTime));

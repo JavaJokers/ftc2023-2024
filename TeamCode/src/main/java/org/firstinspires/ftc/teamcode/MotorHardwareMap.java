@@ -27,9 +27,9 @@ public class MotorHardwareMap {
     private int elbowTimerStart = 50;
     private int elbowTimerActual = elbowTimerStart;
     private boolean prevServoSpin = false;
-    private boolean prevServoReverse = false;
+    public boolean prevServoReverse = false;
     private boolean servoDirection = false;
-    private boolean intakeSpinning = false;
+    public boolean intakeSpinning = false;
     private static double armLockLow = 0.76;
     private static double armLockHigh = 1.0;
 
@@ -41,40 +41,23 @@ public class MotorHardwareMap {
         telemetry = telem;
         hardwareMap = map;
     }
-    private void armMovementChange (double armVelocity, int armPosition){
-        if(armPosition < arm.getCurrentPosition()){
-            armVelocity = Math.abs(armVelocity)*-1;
+    private void jointMovementChange (double velocity, int position, DcMotorEx motor){
+        if(position < motor.getCurrentPosition()){
+            velocity = Math.abs(velocity)*-1;
         }else{
-            armVelocity = Math.abs(armVelocity);
+            velocity = Math.abs(velocity);
         }
-        arm.setPower(1.0);
-        if(arm.getCurrentPosition()<=(armPosition+50)&&arm.getCurrentPosition()>=(armPosition-50)){
-            arm.setTargetPosition(armPosition);
-            arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        motor.setPower(1.0);
+        if(motor.getCurrentPosition()<=(position+50)&&motor.getCurrentPosition()>=(position-50)){
+            motor.setTargetPosition(position);
+            motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         }else{
-            arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            arm.setVelocity(armVelocity);
-        }
-
-    }
-    private void elbowMovementChange (double elbowVelocity, int elbowPosition){
-        if(elbowPosition < elbow.getCurrentPosition()){
-            elbowVelocity = Math.abs(elbowVelocity)*-1;
-        }else{
-            elbowVelocity = Math.abs(elbowVelocity);
-        }
-        elbowTargetVelocity = elbowVelocity;
-        elbowTargetPosition = elbowPosition;
-        elbow.setPower(1.0);
-        if(elbow.getCurrentPosition()<=(elbowPosition+20)&&elbow.getCurrentPosition()>=(elbowPosition-20)){
-            elbow.setTargetPosition(elbowPosition);
-            elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        }else{
-            elbow.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            elbow.setVelocity(elbowVelocity);
+            motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            motor.setVelocity(velocity);
         }
 
     }
+
     public void begin () {
         //This is where the servos and motors are and commands for them
         launcherServo = hardwareMap.servo.get("launcherServo");
@@ -110,19 +93,19 @@ public class MotorHardwareMap {
 
         if(elbowTarget == 1){ //intake (up)
             elbowTimerActual = elbowTimerStart;
-            armMovementChange(150,0);
-            elbowMovementChange(50,375);
+            jointMovementChange(300,0,arm);
+            jointMovementChange(50,400,elbow);
         }else if(elbowTarget == 2){ // drive (right)
-            armMovementChange(200,600);
-            elbowMovementChange(100,500);
+            jointMovementChange(300,600,arm);
+            jointMovementChange(100,500,elbow);
             elbowTimerActual = elbowTimerStart;
         }else if(elbowTarget == 3){ // place pixel/outtake (down)
-            armMovementChange(150,2150);
-            elbowMovementChange(100,600);
+            jointMovementChange(300,1800,arm);
+            jointMovementChange(100,0,elbow);
         }else if(elbowTarget == 4){ // prepare to hang (left)
             elbowTimerActual = elbowTimerStart;
-            armMovementChange(150,1800);
-            elbowMovementChange(50,0);
+            jointMovementChange(300,1800,arm);
+            jointMovementChange(50,0,elbow);
 
         } else if (elbowTarget == 5){ //hang (left again)
             arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
