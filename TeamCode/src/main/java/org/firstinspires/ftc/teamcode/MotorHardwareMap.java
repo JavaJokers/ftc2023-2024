@@ -93,18 +93,18 @@ public class MotorHardwareMap {
 
         if(elbowTarget == 1){ //intake (up)
             elbowTimerActual = elbowTimerStart;
-            jointMovementChange(300,0,arm);
+            jointMovementChange(400,0,arm);
             jointMovementChange(50,400,elbow);
         }else if(elbowTarget == 2){ // drive (right)
-            jointMovementChange(300,600,arm);
+            jointMovementChange(400,600,arm);
             jointMovementChange(100,500,elbow);
             elbowTimerActual = elbowTimerStart;
         }else if(elbowTarget == 3){ // place pixel/outtake (down)
-            jointMovementChange(300,1800,arm);
+            jointMovementChange(400,1800,arm);
             jointMovementChange(100,0,elbow);
         }else if(elbowTarget == 4){ // prepare to hang (left)
             elbowTimerActual = elbowTimerStart;
-            jointMovementChange(300,1800,arm);
+            jointMovementChange(400,1800,arm);
             jointMovementChange(50,0,elbow);
 
         } else if (elbowTarget == 5){ //hang (left again)

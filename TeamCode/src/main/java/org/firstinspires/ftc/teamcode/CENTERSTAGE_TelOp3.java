@@ -20,6 +20,8 @@ public class CENTERSTAGE_TelOp3 extends LinearOpMode{
     private boolean targetThree = false;
     private boolean prevTargetFour = false;
     private boolean targetFour = false;
+    private boolean twenntyFive = false;
+    private boolean seventyFive = false;
 
     boolean readyToHang = false;
     int elbowTarget = 1;
@@ -65,8 +67,17 @@ public class CENTERSTAGE_TelOp3 extends LinearOpMode{
                 armPower = gamepad2.right_trigger * -1;
             }
 
-
-            mecanum.update(gamepad1.left_stick_x * 1.1, gamepad1.left_stick_y, gamepad1.right_stick_x, false, false, gamepad1.left_bumper && gamepad1.right_bumper);
+            if(gamepad1.left_trigger != 0){
+                twenntyFive = true;
+            }else{
+                twenntyFive = false;
+            }
+            if(gamepad1.right_trigger != 0){
+                seventyFive = true;
+            }else{
+                seventyFive = false;
+            }
+            mecanum.update(gamepad1.left_stick_x * 1.1, gamepad1.left_stick_y, gamepad1.right_stick_x, seventyFive, twenntyFive, gamepad1.left_bumper && gamepad1.right_bumper);
             motors.update(armPower, gamepad2.x, gamepad2.right_stick_y, gamepad2.left_stick_y, gamepad2.a, (byte) ((gamepad2.dpad_down ? 1 : 0) + (gamepad2.dpad_left ? 2 : 0) + (gamepad2.dpad_up ? 4 : 0) + (gamepad2.dpad_right ? 8 : 0)), gamepad2.left_bumper && gamepad2.right_bumper, gamepad2.y, gamepad2.b, elbowTarget,gamepad1.a);
         }    /*telemetry.addData("front left encoder", mecanum.lF.getCurrentPosition());
             telemetry.addData("front right encoder", mecanum.rF.getCurrentPosition());
